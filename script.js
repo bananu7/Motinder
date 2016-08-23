@@ -5,11 +5,13 @@ $(document).ready(function(){
       if (user) {        
         console.log('signed in as ' + user.uid);
 
-        firebaseRef.on("value", function(snapshot) {
-          console.log(snapshot.val());
+        firebase.database().ref('pending').on("child_added", function(data) {
+          console.log(data);
+          addLink(data.val());
         }, function (errorObject) {
           console.log("The read failed: " + errorObject.code);
         });
+
       } else {
         firebase.auth().signInWithEmailAndPassword('example@example.com', 'example').catch(function(error) {
           // Handle Errors here.
@@ -20,19 +22,32 @@ $(document).ready(function(){
       }
     });
 
-    $(".buddy").on("swiperight",function(){
-      $(this).addClass('rotate-left').delay(700).fadeOut(1);
-      $('.buddy').find('.status').remove();
+});
 
-      $(this).append('<div class="status like">Like!</div>');      
-      if ( $(this).is(':last-child') ) {
-        $('.buddy:nth-child(1)').removeClass ('rotate-left rotate-right').fadeIn(300);
-       } else {
-          $(this).next().removeClass('rotate-left rotate-right').fadeIn(400);
-       }
-    });  
+function addLink(url) {
+  var elem = $('<div></div>');
+  elem.addClass('buddy');
+  elem.css('display', 'block');
 
-   $(".buddy").on("swipeleft",function(){
+  var img = $('<div></div>');
+  img.addClass('avatar');
+  img.css("display", 'block')
+  img.css('background-image', 'url(' + url + ')');
+  elem.append(img);
+
+  elem.on("swiperight", function(){
+    $(this).addClass('rotate-left').delay(700).fadeOut(1);
+    $('.buddy').find('.status').remove();
+
+    $(this).append('<div class="status like">Like!</div>');      
+    if ( $(this).is(':last-child') ) {
+      $('.buddy:nth-child(1)').removeClass ('rotate-left rotate-right').fadeIn(300);
+     } else {
+        $(this).next().removeClass('rotate-left rotate-right').fadeIn(400);
+     }
+  });
+
+  elem.on("swipeleft", function(){
     $(this).addClass('rotate-right').delay(700).fadeOut(1);
     $('.buddy').find('.status').remove();
     $(this).append('<div class="status dislike">Dislike!</div>');
@@ -42,7 +57,9 @@ $(document).ready(function(){
       alert('Na-na!');
      } else {
         $(this).next().removeClass('rotate-left rotate-right').fadeIn(400);
-    } 
+    }
   });
 
-});
+  $('#container').append(elem);
+}
+    
