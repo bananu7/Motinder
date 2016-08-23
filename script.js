@@ -1,6 +1,25 @@
 $(document).ready(function(){
     console.log('init');
 
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {        
+        console.log('signed in as ' + user.uid);
+
+        firebaseRef.on("value", function(snapshot) {
+          console.log(snapshot.val());
+        }, function (errorObject) {
+          console.log("The read failed: " + errorObject.code);
+        });
+      } else {
+        firebase.auth().signInWithEmailAndPassword('example@example.com', 'example').catch(function(error) {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          console.log('auth error: ' + error.message)
+        });
+      }
+    });
+
     $(".buddy").on("swiperight",function(){
       $(this).addClass('rotate-left').delay(700).fadeOut(1);
       $('.buddy').find('.status').remove();
